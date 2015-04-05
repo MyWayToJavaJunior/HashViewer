@@ -21,7 +21,7 @@ import io.github.kirillf.hashviewer.utils.future.FutureExecutor;
 /**
  * HttpService object - singleton service implementation of FutureExecutor.
  * Service, performing http operation.
- * Based on ExecutorService and ThreadPoolExecutor.
+ * Based on ExecutorService and ScheduledThreadPoolExecutor.
  * Http requests and responses performed by HttpUrlConnection class.
  *
  */
@@ -33,7 +33,7 @@ public class HttpService implements FutureExecutor<HttpRequest, HttpResponse> {
     private static HttpService httpService;
 
     private HttpService() {
-        executor = Executors.newFixedThreadPool(POOL_SIZE);
+        executor = Executors.newScheduledThreadPool(POOL_SIZE);
     }
 
     public static HttpService getInstance() {
@@ -47,7 +47,7 @@ public class HttpService implements FutureExecutor<HttpRequest, HttpResponse> {
     public Future<HttpResponse> apply(HttpRequest request) {
         HttpResponseFuture responseFuture = new HttpResponseFuture();
         HttpTask task = new HttpTask(request, responseFuture);
-        executor.submit(task);
+        executor.submit(task, request.getDelay());
         return responseFuture;
     }
 

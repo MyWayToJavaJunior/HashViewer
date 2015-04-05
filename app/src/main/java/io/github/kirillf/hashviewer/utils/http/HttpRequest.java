@@ -14,6 +14,7 @@ public class HttpRequest {
     private int connectionTimeout = 9000;
     private Map<String, String> headers;
     private String body;
+    private int delay;
 
     public HttpRequest(String url) {
         this.url = url;
@@ -64,6 +65,14 @@ public class HttpRequest {
         return body;
     }
 
+    public int getDelay() {
+        return delay;
+    }
+
+    public void setDelay(int delay) {
+        this.delay = delay;
+    }
+
     public enum Method {
         GET("GET"),
         PUT("PUT"),
@@ -79,4 +88,5 @@ public class HttpRequest {
             return nativeParam;
         }
     }
+
 }
