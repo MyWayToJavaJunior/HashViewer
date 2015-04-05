@@ -132,7 +132,8 @@ public class SearchFragment extends Fragment implements Handler.Callback {
 
             @Override
             public boolean onQueryTextChange(String s) {
-                if (s.length() == 0) {
+                if (s.length() <= 1) {
+                    listView.setEmptyView(emptyText);
                     twitterController.reset();
                 }
                 if (s.length() > 1) {
@@ -196,8 +197,8 @@ public class SearchFragment extends Fragment implements Handler.Callback {
                     case DATA_RECEIVED:
                         adapter.notifyDataSetChanged();
                         emptyText.setVisibility(View.GONE);
-                        footerProgress.setVisibility(View.VISIBLE);
                         requestState = RequestState.READY;
+                        footerProgress.setVisibility(View.GONE);
                         break;
                     case ERROR:
                         Toast.makeText(getActivity(), "Request Failed: " + event.getMessage(), Toast.LENGTH_LONG).show();
@@ -219,6 +220,7 @@ public class SearchFragment extends Fragment implements Handler.Callback {
                 performSearchRequest(queue);
                 break;
             case MORE:
+                footerProgress.setVisibility(View.VISIBLE);
                 performMoreTweetsRequest();
                 break;
         }
