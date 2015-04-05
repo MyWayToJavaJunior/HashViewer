@@ -1,7 +1,6 @@
 package io.github.kirillf.hashviewer.fragments;
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -11,7 +10,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ImageView;
@@ -31,9 +29,8 @@ import io.github.kirillf.hashviewer.twitter.TwitterDataSource;
 import io.github.kirillf.hashviewer.twitter.TwitterObject;
 
 public class SearchFragment extends Fragment implements Handler.Callback {
-    private static final int SEARCH = 100;
+    private static final int LIVE_SEARCH = 100;
     private static final int MORE = 101;
-    private static final int LIVE_SEARCH = 102;
     private EventDispatcher eventDispatcher;
     private TwitterController twitterController;
     private ListView listView;
@@ -79,7 +76,6 @@ public class SearchFragment extends Fragment implements Handler.Callback {
     private void configureListView(View view) {
         listView = (ListView) view.findViewById(R.id.search_results);
         adapter = new ListViewAdapter(getActivity(), R.layout.search_item, dataProvider.getSearchResults());
-        listView.setAdapter(adapter);
         emptyText = (TextView) view.findViewById(R.id.empty_list);
         listView.setEmptyView(emptyText);
         View progressView = View.inflate(getActivity(), R.layout.progress_view, null);
@@ -90,6 +86,7 @@ public class SearchFragment extends Fragment implements Handler.Callback {
         headerProgress.setVisibility(View.GONE);
         listView.addHeaderView(headerView);
         listView.addFooterView(progressView);
+        listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -124,19 +121,20 @@ public class SearchFragment extends Fragment implements Handler.Callback {
     }
 
     private void configureSearchView(View view) {
-        searchView = (SearchView) view.findViewById(R.id.searchView);
+        searchView = (SearchView) view.findViewById(R.id.search_view);
         searchView.setIconifiedByDefault(false);
         searchView.setQueryHint(getString(R.string.search_hint));
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String s) {
-                Message message = handler.obtainMessage(SEARCH, s);
-                handler.sendMessage(message);
-                return true;
+                return false;
             }
 
             @Override
             public boolean onQueryTextChange(String s) {
+                if (s.length() == 0) {
+                    twitterController.reset();
+                }
                 if (s.length() > 1) {
                     Message message = handler.obtainMessage(LIVE_SEARCH, s);
                     handler.sendMessage(message);
@@ -216,9 +214,6 @@ public class SearchFragment extends Fragment implements Handler.Callback {
                         break;
                 }
                 break;
-            case SEARCH:
-                InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                inputMethodManager.hideSoftInputFromWindow(searchView.getWindowToken(), 0);
             case LIVE_SEARCH:
                 String queue = (String) msg.obj;
                 performSearchRequest(queue);
