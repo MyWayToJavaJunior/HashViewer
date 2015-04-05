@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +17,6 @@ import io.github.kirillf.hashviewer.events.EventDispatcher;
 import io.github.kirillf.hashviewer.twitter.TwitterController;
 
 public class LoadingFragment extends Fragment implements Handler.Callback {
-    private static final String TAG = LoadingFragment.class.getName();
     private EventDispatcher eventDispatcher;
     private OnFragmentInteractionListener mListener;
     private Handler handler;
@@ -81,10 +79,12 @@ public class LoadingFragment extends Fragment implements Handler.Callback {
                 switch (event.getType()) {
                     case NO_CONNECTION:
                         Toast.makeText(getActivity(), getString(R.string.no_connection), Toast.LENGTH_LONG).show();
+                    case ERROR:
+                        Toast.makeText(getActivity(), event.getMessage(), Toast.LENGTH_LONG).show();
                     case AUTHORIZE:
-                        Log.i(TAG, event.getMessage());
                         mListener.onFragmentInteraction(SearchFragment.newInstance(), false);
                         break;
+
                 }
         }
         return false;
