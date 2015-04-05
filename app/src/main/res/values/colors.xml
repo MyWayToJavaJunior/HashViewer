@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="username_text" type="color">#000000</item>
+    <item name="date_text" type="color">#444444</item>
+    <item name="hint_color" type="color">#88444444</item>
+</resources>

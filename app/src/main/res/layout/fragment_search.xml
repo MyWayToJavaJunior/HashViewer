@@ -1,0 +1,42 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="io.github.kirillf.hashviewer.fragments.SearchFragment">
+
+
+    <FrameLayout
+        android:id="@+id/searchView_layout"
+        android:layout_width="match_parent"
+        android:padding="8dp"
+        android:background="#5533B5E5"
+        android:layout_height="wrap_content">
+
+        <android.support.v7.widget.SearchView
+            android:id="@+id/searchView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|top"
+            android:layout_margin="8dp" />
+
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/empty_list"
+        android:text="@string/no_results"
+        android:layout_centerInParent="true"
+        android:textColor="@color/hint_color"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <ListView
+        android:id="@+id/search_results"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/searchView_layout"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"/>
+
+
+</RelativeLayout>
