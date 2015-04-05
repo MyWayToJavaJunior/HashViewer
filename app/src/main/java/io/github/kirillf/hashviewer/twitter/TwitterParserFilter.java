@@ -19,12 +19,14 @@ import io.github.kirillf.hashviewer.utils.http.HttpResponse;
 
 public class TwitterParserFilter implements Filter<HttpRequest, HttpRequest, HttpResponse, List<TwitterObject>> {
     private static final String TAG = TwitterParserFilter.class.getName();
+    private static TwitterParser parser = new TwitterParser();
 
     @Override
     public Future<List<TwitterObject>> apply(HttpRequest httpRequest, FutureExecutor<HttpRequest, HttpResponse> executor) {
-        final CommonFuture<List<TwitterObject>> listFuture = new CommonFuture<>();
-        final TwitterParser parser = new TwitterParser();
-        executor.apply(httpRequest).onSuccess(new FutureCallback<HttpResponse>() {
+        final ParserFuture listFuture = new ParserFuture();
+        Future<HttpResponse> httpResponseFuture = executor.apply(httpRequest);
+        listFuture.setHttpFuture(httpResponseFuture);
+        httpResponseFuture.onSuccess(new FutureCallback<HttpResponse>() {
             @Override
             public void apply(HttpResponse result) {
                 int code = result.getResponseCode();
@@ -34,7 +36,7 @@ public class TwitterParserFilter implements Filter<HttpRequest, HttpRequest, Htt
                         List<TwitterObject> twitterObjects = parser.parse(content);
                         listFuture.setFutureResult(twitterObjects);
                     } catch (UnsupportedEncodingException | JSONException e) {
-                        e.printStackTrace();
+                        Log.w(TAG, "Unable to parse tweet: " + e.toString());
                     }
                 } else {
                     listFuture.setFutureFailed(new TwitterException("Api response codeL " + code));
@@ -49,4 +51,21 @@ public class TwitterParserFilter implements Filter<HttpRequest, HttpRequest, Htt
         });
         return listFuture;
     }
+
+    private class ParserFuture extends CommonFuture<List<TwitterObject>> {
+        private Future<HttpResponse> httpResponseFuture;
+
+        public void setHttpFuture(Future<HttpResponse> httpResponseFuture) {
+            this.httpResponseFuture = httpResponseFuture;
+        }
+
+        @Override
+        public void cancel() {
+            super.cancel();
+            if (httpResponseFuture != null) {
+                httpResponseFuture.cancel();
+            }
+        }
+    }
+
 }

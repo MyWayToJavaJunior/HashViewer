@@ -25,33 +25,37 @@ public class TwitterParser {
         JSONObject jsonObject = new JSONObject(content);
         JSONArray statuses = jsonObject.getJSONArray("statuses");
         for (int i = 0; i < statuses.length(); i++) {
-            JSONObject status = statuses.getJSONObject(i);
-            long id = status.getLong("id");
-            TwitterObject twitterObject = new TwitterObject(id);
+            try {
+                JSONObject status = statuses.getJSONObject(i);
+                long id = status.getLong("id");
+                TwitterObject twitterObject = new TwitterObject(id);
 
-            JSONObject entities = status.getJSONObject("entities");
-            JSONArray tags = entities.getJSONArray("hashtags");
-            List<String> tagsList = new LinkedList<>();
-            for (int j = 0; j < tags.length(); j++) {
-                JSONObject tag = tags.getJSONObject(j);
-                tagsList.add(tag.getString("text"));
+                JSONObject entities = status.getJSONObject("entities");
+                JSONArray tags = entities.getJSONArray("hashtags");
+                List<String> tagsList = new LinkedList<>();
+                for (int j = 0; j < tags.length(); j++) {
+                    JSONObject tag = tags.getJSONObject(j);
+                    tagsList.add(tag.getString("text"));
+                }
+                twitterObject.setTags(tagsList);
+
+                String text = status.getString("text");
+                twitterObject.setText(text);
+                String date = status.getString("created_at");
+                twitterObject.setDate(convertDate(date));
+
+                JSONObject user = status.getJSONObject("user");
+                String name = user.getString("name");
+                String screenName = user.getString("screen_name");
+                String imageUrl = user.getString("profile_image_url_https");
+                imageUrl = imageUrl.replace("_normal", "_bigger");
+                twitterObject.setUserName(name);
+                twitterObject.setProfileImageUrl(imageUrl);
+                twitterObject.setScreenName(screenName);
+                twitterObjects.add(twitterObject);
+            } catch (JSONException e) {
+                Log.w(TAG, e);
             }
-            twitterObject.setTags(tagsList);
-
-            String text = status.getString("text");
-            twitterObject.setText(text);
-            String date = status.getString("created_at");
-            twitterObject.setDate(convertDate(date));
-
-            JSONObject user = status.getJSONObject("user");
-            String name = user.getString("name");
-            String screenName = user.getString("screen_name");
-            String imageUrl = user.getString("profile_image_url_https");
-            imageUrl = imageUrl.replace("_normal", "_bigger");
-            twitterObject.setUserName(name);
-            twitterObject.setProfileImageUrl(imageUrl);
-            twitterObjects.add(twitterObject);
-            twitterObject.setScreenName(screenName);
         }
         return twitterObjects;
     }

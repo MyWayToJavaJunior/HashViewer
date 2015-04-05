@@ -48,10 +48,8 @@ class TwitterOAuth implements FutureExecutor<TwitterCredentials, String> {
                         String strResult = new String(content, "UTF-8");
                         String bearerToken = getBearerToken(strResult);
                         resultFuture.setBearerToken(bearerToken);
-                        Log.i(TAG, strResult);
-                        Log.i(TAG, bearerToken);
                     } catch (UnsupportedEncodingException | JSONException e) {
-                        e.printStackTrace();
+                        resultFuture.setRequestFailed(e);
                     }
                 }
             }

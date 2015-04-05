@@ -1,6 +1,7 @@
 package io.github.kirillf.hashviewer.twitter;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.ref.WeakReference;
 import java.net.URLEncoder;
 import java.util.List;
 
@@ -16,8 +17,10 @@ import io.github.kirillf.hashviewer.utils.http.HttpService;
  * Singleton object.
  */
 public class TwitterHttpService {
+    private static final int REQUEST_DELAY = 250;
     private HttpService httpService;
     private String bearerToken;
+    private WeakReference<Future<List<TwitterObject>>> futureWeakReference;
 
     private static TwitterHttpService twitterService;
 
@@ -56,6 +59,12 @@ public class TwitterHttpService {
      * @return future object with list of TwitterObjects
      */
     public Future<List<TwitterObject>> query(String searchQueue, long id) {
+        if (futureWeakReference != null) {
+            Future f = futureWeakReference.get();
+            if (f != null) {
+                f.cancel();
+            }
+        }
         String query = prepareQuery(searchQueue);
         String url = null;
         try {
@@ -69,8 +78,11 @@ public class TwitterHttpService {
         final HttpRequest request = new HttpRequest(url);
         request.setMethod(HttpRequest.Method.GET);
         request.addHeader("Authorization", "Bearer " + bearerToken);
+        request.setDelay(REQUEST_DELAY);
         TwitterParserFilter parserFilter = new TwitterParserFilter();
-        return  parserFilter.apply(request, httpService);
+        Future<List<TwitterObject>> result = parserFilter.apply(request, httpService);
+        futureWeakReference = new WeakReference<>(result);
+        return result;
     }
 
     private String prepareQuery(String query) {
