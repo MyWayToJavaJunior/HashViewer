@@ -10,9 +10,9 @@ import java.util.List;
 import io.github.kirillf.hashviewer.Constants;
 import io.github.kirillf.hashviewer.events.Event;
 import io.github.kirillf.hashviewer.events.EventDispatcher;
+import io.github.kirillf.hashviewer.exceptions.InitializeException;
 import io.github.kirillf.hashviewer.exceptions.EmptyResultSetException;
 import io.github.kirillf.hashviewer.utils.future.FutureCallback;
-import io.github.kirillf.hashviewer.utils.http.HttpService;
 
 /**
  * Controller provides UI calls to background core services.
@@ -28,17 +28,22 @@ public class TwitterController {
 
     private static TwitterController twitterController;
 
-    private TwitterController(Context context) {
-        HttpService httpService = HttpService.getInstance();
-        eventDispatcher = EventDispatcher.getInstance();
-        twitterHttpService = TwitterHttpService.getInstance(httpService);
-        dataSource = TwitterDataSource.getInstance(eventDispatcher);
+    private TwitterController(Context context, EventDispatcher eventDispatcher,
+                              TwitterHttpService twitterHttpService, TwitterDataProvider dataSource) {
+        this.eventDispatcher = eventDispatcher;
+        this.twitterHttpService = twitterHttpService;
+        this.dataSource = dataSource;
         this.context = context;
     }
 
-    public static synchronized TwitterController getInstance(Context context) {
+    public static void init(Context context, TwitterHttpService twitterHttpService,
+                            EventDispatcher eventDispatcher, TwitterDataProvider dataSource) {
+        twitterController = new TwitterController(context, eventDispatcher, twitterHttpService, dataSource);
+    }
+
+    public static synchronized TwitterController getInstance() throws InitializeException {
         if (twitterController == null) {
-            twitterController = new TwitterController(context);
+            throw new InitializeException("Controller not initialized");
         }
         return twitterController;
     }

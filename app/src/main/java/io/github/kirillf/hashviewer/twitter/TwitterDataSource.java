@@ -7,6 +7,7 @@ import java.util.List;
 import io.github.kirillf.hashviewer.events.Event;
 import io.github.kirillf.hashviewer.events.EventDispatcher;
 import io.github.kirillf.hashviewer.exceptions.EmptyResultSetException;
+import io.github.kirillf.hashviewer.exceptions.InitializeException;
 
 /**
  * In-memory TwitterDataProvider implementation.
@@ -23,9 +24,13 @@ public class TwitterDataSource implements TwitterDataProvider<TwitterObject> {
         this.eventDispatcher = eventDispatcher;
     }
 
-    public static synchronized TwitterDataSource getInstance(EventDispatcher eventDispatcher) {
+    public static void init(EventDispatcher eventDispatcher) {
+        twitterDataSource = new TwitterDataSource(eventDispatcher);
+    }
+
+    public static synchronized TwitterDataSource getInstance() throws InitializeException {
         if (twitterDataSource == null) {
-            twitterDataSource = new TwitterDataSource(eventDispatcher);
+            throw new InitializeException("Not initialized");
         }
         return twitterDataSource;
     }

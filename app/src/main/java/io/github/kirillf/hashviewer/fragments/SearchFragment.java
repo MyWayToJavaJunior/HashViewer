@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,14 +24,17 @@ import io.github.kirillf.hashviewer.adapters.ListViewAdapter;
 import io.github.kirillf.hashviewer.events.Event;
 import io.github.kirillf.hashviewer.events.EventDispatcher;
 import io.github.kirillf.hashviewer.Constants;
+import io.github.kirillf.hashviewer.exceptions.InitializeException;
 import io.github.kirillf.hashviewer.twitter.TwitterController;
 import io.github.kirillf.hashviewer.twitter.TwitterDataProvider;
 import io.github.kirillf.hashviewer.twitter.TwitterDataSource;
 import io.github.kirillf.hashviewer.twitter.TwitterObject;
 
 public class SearchFragment extends Fragment implements Handler.Callback {
+    private static final String TAG = SearchFragment.class.getName();
     private static final int LIVE_SEARCH = 100;
     private static final int MORE = 101;
+    private static final int INITIALIZATION_ERROR = 102;
     private EventDispatcher eventDispatcher;
     private TwitterController twitterController;
     private ListView listView;
@@ -63,14 +67,24 @@ public class SearchFragment extends Fragment implements Handler.Callback {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_search, container, false);
         eventDispatcher = EventDispatcher.getInstance();
-        twitterController = TwitterController.getInstance(getActivity());
-        twitterController.reset();
-        dataProvider = TwitterDataSource.getInstance(eventDispatcher);
         handler = new Handler(this);
+        init(handler);
         configureSearchView(view);
         configureListView(view);
         temp = createProgressBar();
         return view;
+    }
+
+    private void init(Handler handler) {
+        try {
+            twitterController = TwitterController.getInstance();
+            twitterController.reset();
+            dataProvider = TwitterDataSource.getInstance();
+        } catch (InitializeException e) {
+            Log.e(TAG, e.toString());
+            Message message = handler.obtainMessage(INITIALIZATION_ERROR);
+            handler.sendMessage(message);
+        }
     }
 
     private void configureListView(View view) {
@@ -223,6 +237,8 @@ public class SearchFragment extends Fragment implements Handler.Callback {
                 footerProgress.setVisibility(View.VISIBLE);
                 performMoreTweetsRequest();
                 break;
+            case INITIALIZATION_ERROR:
+                Toast.makeText(getActivity(), "INITIALIZATION_ERROR", Toast.LENGTH_LONG).show();
         }
         return false;
     }
@@ -248,5 +264,4 @@ public class SearchFragment extends Fragment implements Handler.Callback {
         FINISHED,
         ERROR
     }
-
 }

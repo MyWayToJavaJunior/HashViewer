@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,9 +15,12 @@ import io.github.kirillf.hashviewer.Constants;
 import io.github.kirillf.hashviewer.R;
 import io.github.kirillf.hashviewer.events.Event;
 import io.github.kirillf.hashviewer.events.EventDispatcher;
+import io.github.kirillf.hashviewer.exceptions.InitializeException;
 import io.github.kirillf.hashviewer.twitter.TwitterController;
 
 public class LoadingFragment extends Fragment implements Handler.Callback {
+    private static final String TAG = LoadingFragment.class.getName();
+    private static final int INITIALIZATION_ERROR = 102;
     private EventDispatcher eventDispatcher;
     private OnFragmentInteractionListener mListener;
     private Handler handler;
@@ -34,7 +38,6 @@ public class LoadingFragment extends Fragment implements Handler.Callback {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         handler = new Handler(this);
         return inflater.inflate(R.layout.fragment_loading, container, false);
     }
@@ -50,13 +53,23 @@ public class LoadingFragment extends Fragment implements Handler.Callback {
         }
     }
 
+    private void authorize(Handler handler) {
+        try {
+            TwitterController.getInstance().authenticate();
+        } catch (InitializeException e) {
+            Log.e(TAG, e.toString());
+            Message message = handler.obtainMessage(INITIALIZATION_ERROR);
+            handler.sendMessage(message);
+        }
+    }
+
 
     @Override
     public void onResume() {
         super.onResume();
         eventDispatcher = EventDispatcher.getInstance();
         eventDispatcher.setHandler(handler);
-        TwitterController.getInstance(getActivity()).authenticate();
+        authorize(handler);
     }
 
     @Override
@@ -84,8 +97,10 @@ public class LoadingFragment extends Fragment implements Handler.Callback {
                     case AUTHORIZE:
                         mListener.onFragmentInteraction(SearchFragment.newInstance(), false);
                         break;
-
                 }
+                break;
+            case INITIALIZATION_ERROR:
+                Toast.makeText(getActivity(), "Initialization error", Toast.LENGTH_LONG).show();
         }
         return false;
     }

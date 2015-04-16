@@ -6,6 +6,7 @@ import java.net.URLEncoder;
 import java.util.List;
 
 import io.github.kirillf.hashviewer.Constants;
+import io.github.kirillf.hashviewer.exceptions.InitializeException;
 import io.github.kirillf.hashviewer.utils.future.Future;
 import io.github.kirillf.hashviewer.utils.http.HttpRequest;
 import io.github.kirillf.hashviewer.utils.http.HttpService;
@@ -28,9 +29,13 @@ public class TwitterHttpService {
         this.httpService = service;
     }
 
-    public static TwitterHttpService getInstance(HttpService service) {
+    public static void init(HttpService httpService) {
+        twitterService = new TwitterHttpService(httpService);
+    }
+
+    public static TwitterHttpService getInstance() throws InitializeException {
         if (twitterService == null) {
-            twitterService = new TwitterHttpService(service);
+            throw new InitializeException("Not initialized");
         }
         return twitterService;
     }
