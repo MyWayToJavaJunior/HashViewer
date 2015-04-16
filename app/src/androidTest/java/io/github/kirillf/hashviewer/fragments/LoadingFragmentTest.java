@@ -15,7 +15,6 @@ public class LoadingFragmentTest extends ActivityInstrumentationTestCase2<HashVi
     private HashViewerActivity hashViewerActivity;
     private FragmentManager supportFragmentManager;
 
-
     public LoadingFragmentTest() {
         super(HashViewerActivity.class);
     }
@@ -32,7 +31,6 @@ public class LoadingFragmentTest extends ActivityInstrumentationTestCase2<HashVi
     }
 
     public void testPreConditions() {
-        assertTrue(supportFragmentManager.getFragments().size() == 1);
         Fragment fragment = supportFragmentManager.getFragments().get(0);
         assertTrue(fragment.getClass().equals(LoadingFragment.class));
     }
