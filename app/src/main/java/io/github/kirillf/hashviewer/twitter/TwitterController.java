@@ -123,11 +123,10 @@ public class TwitterController {
      * @param query query
      */
     public void searchTweets(String query) {
-        searchTweets(query, -1);
+        searchTweets(query, Constants.INITIAL_TWEET_ID);
     }
 
-    private boolean isInternetConnected() {
-        ConnectivityManager connectivityManager =
+    private boolean isInternetConnected() { ConnectivityManager connectivityManager =
                 (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
         return networkInfo != null && networkInfo.isConnectedOrConnecting();

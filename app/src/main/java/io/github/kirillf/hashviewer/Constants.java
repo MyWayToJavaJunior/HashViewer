@@ -8,6 +8,8 @@ public class Constants {
     public static final String TWITTER_SEARCH_API = "https://api.twitter.com/1.1/search/tweets.json";
     public static final String TWITTER_URL = "https://twitter.com/";
 
+    public static final int INITIAL_TWEET_ID = -1;
+
     public static final int WHAT = 757332;
 
     public static final int HTTP_OK = 200;

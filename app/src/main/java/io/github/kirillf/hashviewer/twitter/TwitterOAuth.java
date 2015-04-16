@@ -10,6 +10,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 import io.github.kirillf.hashviewer.Constants;
+import io.github.kirillf.hashviewer.exceptions.TwitterException;
 import io.github.kirillf.hashviewer.utils.future.AbstractFuture;
 import io.github.kirillf.hashviewer.utils.future.Future;
 import io.github.kirillf.hashviewer.utils.future.FutureCallback;
@@ -41,6 +42,9 @@ class TwitterOAuth implements FutureExecutor<TwitterCredentials, String> {
             @Override
             public void apply(HttpResponse result) {
                 int code = result.getResponseCode();
+                if (code != Constants.HTTP_OK) {
+                    resultFuture.setRequestFailed(new TwitterException("Http response code: " + code));
+                }
                 Log.i(TAG, String.valueOf(code));
                 byte[] content = result.getContent();
                 if (content.length > 0) {
